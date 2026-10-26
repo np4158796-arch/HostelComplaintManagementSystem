@@ -1,0 +1,40 @@
+## Visual Studio & .NET GitIgnore
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+*.swp
+*~
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+build/
+bld/
+
+# Publish
+publish/
+*.publishproj
+
+# ASP.NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Local database files
+*.mdf
+*.ldf
+
+# Uploaded runtime test files (keep folder structure, exclude temporary files)
+wwwroot/uploads/*/*
+!wwwroot/uploads/.gitkeep

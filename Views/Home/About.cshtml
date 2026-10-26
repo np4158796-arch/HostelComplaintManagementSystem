@@ -1,0 +1,53 @@
+@{
+    ViewData["Title"] = "About HostelCare";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-9">
+        <div class="card-custom bg-white p-4 p-md-5 shadow-sm border mb-4">
+            <span class="badge bg-violet text-white px-3 py-1 rounded-pill small mb-2">Subject: IT5039</span>
+            <h2 class="fw-bold text-dark mb-3">About the HostelCare Project</h2>
+            <p class="lead text-secondary fs-6">
+                <strong>HostelCare</strong> is an enterprise-grade Hostel Complaint Management System designed and implemented as an academic semester capstone for the course <strong>IT5039 – Web Technology with .NET</strong> in the B.Tech Computer Engineering curriculum.
+            </p>
+
+            <hr class="my-4" />
+
+            <h5 class="fw-bold text-dark mb-3">Project Architectural Highlights</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-layers-fill text-violet me-2"></i>Multi-Tier MVC Architecture</strong>
+                        <p class="small text-muted mb-0">Clean separation of concerns with Models, Strongly-Typed Razor Views, Controllers, ViewModels, and specialized business service layers.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-shield-check text-success me-2"></i>Role-Based Access Control</strong>
+                        <p class="small text-muted mb-0">Enforced by ASP.NET Core Identity with custom roles for Student, Warden, and Maintenance Staff with strict server-side boundary validation.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-database-fill-gear text-info me-2"></i>Entity Framework Core & LocalDB</strong>
+                        <p class="small text-muted mb-0">Relational data persistence with 12 interconnected entities, cascading deletion guards, and LINQ-based query filtering and pagination.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>RESTful API & Minimal APIs</strong>
+                        <p class="small text-muted mb-0">Full REST API with HTTP PATCH status transitions, OpenAPI/Swagger interactive UI, and lightweight Minimal API telemetry.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold text-dark mb-3">Hostel Administration Directory</h5>
+            <ul class="list-unstyled text-secondary small">
+                <li class="mb-2"><i class="bi bi-person-badge text-violet me-2"></i><strong>Chief Warden:</strong> Dr. Rajeshwar Rao (warden@hostelcare.com)</li>
+                <li class="mb-2"><i class="bi bi-tools text-warning me-2"></i><strong>Senior Electrician:</strong> Sunil Verma (electrician@hostelcare.com)</li>
+                <li class="mb-2"><i class="bi bi-droplet text-info me-2"></i><strong>Senior Plumber:</strong> Manoj Kumar (plumber@hostelcare.com)</li>
+                <li class="mb-2"><i class="bi bi-building text-primary me-2"></i><strong>Campus Block Directory:</strong> Block A (Boys Wing), Block B (Girls Wing), Block C (International/PG)</li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,98 @@
+@model HostelComplaintManagementSystem.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Account Profile & Settings";
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-10">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-1 text-dark">My Profile & Security Settings</h3>
+            <p class="text-muted small mb-0">Manage your contact information and update account login credentials.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Personal Information & Contact Update -->
+            <div class="col-lg-6">
+                <div class="card-custom bg-white p-4 shadow-sm mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        <div class="avatar-circle bg-gradient-violet text-white fs-4" style="width: 54px; height: 54px;">
+                            @(Model.FullName.Substring(0, 1).ToUpper())
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">@Model.FullName</h5>
+                            <span class="badge bg-secondary-subtle text-secondary">@Model.Role</span>
+                            <span class="small text-muted ms-2"><i class="bi bi-calendar-event me-1"></i>Since @Model.MemberSince.ToString("MMM yyyy")</span>
+                        </div>
+                    </div>
+
+                    <form asp-action="UpdateContact" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Email Address (Read-only)</label>
+                            <input type="text" value="@Model.Email" class="form-control bg-light" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Student ID / Employee ID (Read-only)</label>
+                            <input type="text" value="@(Model.StudentId ?? "N/A")" class="form-control bg-light font-monospace" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Phone Number</label>
+                            <input type="text" name="phoneNumber" value="@Model.PhoneNumber" class="form-control" placeholder="10-digit phone number" required />
+                        </div>
+
+                        @if (Model.Role == HostelComplaintManagementSystem.Models.UserRoleType.Student)
+                        {
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-7">
+                                    <label class="form-label small fw-semibold text-secondary">Hostel Block</label>
+                                    <select name="blockId" asp-items="ViewBag.Blocks" class="form-select">
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-semibold text-secondary">Room Number</label>
+                                    <input type="text" name="roomNumber" value="@Model.RoomNumber" class="form-control" />
+                                </div>
+                            </div>
+                        }
+
+                        <button type="submit" class="btn btn-violet w-100 py-2">
+                            <i class="bi bi-save me-1"></i>Save Contact Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Password Change Form -->
+            <div class="col-lg-6">
+                <div class="card-custom bg-white p-4 shadow-sm">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-key text-violet me-2"></i>Change Account Password</h6>
+                    <form asp-action="ChangePassword" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Current Password *</label>
+                            <input type="password" name="OldPassword" class="form-control" placeholder="••••••••" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">New Password *</label>
+                            <input type="password" name="NewPassword" class="form-control" placeholder="Minimum 6 characters" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-secondary">Confirm New Password *</label>
+                            <input type="password" name="ConfirmPassword" class="form-control" placeholder="Re-type new password" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-navy text-white w-100 py-2">
+                            <i class="bi bi-shield-check me-1"></i>Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

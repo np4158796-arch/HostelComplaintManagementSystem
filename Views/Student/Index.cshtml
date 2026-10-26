@@ -1,0 +1,252 @@
+@model HostelComplaintManagementSystem.ViewModels.StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<!-- Welcome Banner -->
+<div class="card-custom bg-gradient-navy text-white p-4 p-md-5 mb-4 shadow position-relative overflow-hidden">
+    <div class="row align-items-center g-3 position-relative z-1">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-violet text-white px-3 py-1 rounded-pill small">Student Resident Portal</span>
+                <span class="text-white-50 small"><i class="bi bi-clock me-1"></i>Real-time Sync</span>
+            </div>
+            <h2 class="fw-bold mb-1">Welcome back, @Model.StudentName!</h2>
+            <p class="text-white-50 mb-0">
+                <i class="bi bi-building me-1"></i><strong>Block:</strong> @(Model.BlockName ?? "Not assigned") &bull; 
+                <i class="bi bi-door-open me-1"></i><strong>Room:</strong> @(Model.RoomNumber ?? "N/A") &bull; 
+                <i class="bi bi-person-badge me-1"></i><strong>ID:</strong> @(Model.StudentId ?? "N/A")
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a asp-action="SubmitComplaint" class="btn btn-violet btn-lg px-4 py-2 shadow-sm rounded-3">
+                <i class="bi bi-plus-circle-fill me-2"></i>New Complaint
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-semibold">Total Logged</div>
+                    <div class="fs-2 fw-bold text-dark mt-1">@Model.TotalComplaints</div>
+                </div>
+                <div class="stat-icon-wrapper bg-primary-subtle text-primary">
+                    <i class="bi bi-folder2-open fs-4"></i>
+                </div>
+            </div>
+            <div class="small text-muted mt-2"><i class="bi bi-clock-history me-1"></i>All-time submitted</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-semibold">Pending Review</div>
+                    <div class="fs-2 fw-bold text-warning-emphasis mt-1">@Model.PendingComplaints</div>
+                </div>
+                <div class="stat-icon-wrapper bg-warning-subtle text-warning">
+                    <i class="bi bi-hourglass-split fs-4"></i>
+                </div>
+            </div>
+            <div class="small text-muted mt-2"><i class="bi bi-bell me-1"></i>Awaiting triage</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-semibold">In Progress</div>
+                    <div class="fs-2 fw-bold text-primary mt-1">@Model.InProgressComplaints</div>
+                </div>
+                <div class="stat-icon-wrapper bg-info-subtle text-info">
+                    <i class="bi bi-tools fs-4"></i>
+                </div>
+            </div>
+            <div class="small text-muted mt-2"><i class="bi bi-person-gear me-1"></i>With technicians</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-semibold">Resolved</div>
+                    <div class="fs-2 fw-bold text-success mt-1">@Model.ResolvedComplaints</div>
+                </div>
+                <div class="stat-icon-wrapper bg-success-subtle text-success">
+                    <i class="bi bi-check2-circle fs-4"></i>
+                </div>
+            </div>
+            <div class="small text-muted mt-2"><i class="bi bi-patch-check me-1"></i>Completed repairs</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Section: Recent Complaints & Chart / Notifications -->
+<div class="row g-4">
+    <!-- Left Column: Recent Complaints Table -->
+    <div class="col-lg-8">
+        <div class="card-custom bg-white p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-list-stars text-violet me-2"></i>My Recent Complaints
+                </h5>
+                <a asp-action="MyComplaints" class="small fw-semibold text-violet text-decoration-none">
+                    View All (@Model.TotalComplaints) &rarr;
+                </a>
+            </div>
+
+            @if (!Model.RecentComplaints.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="text-muted mb-3 fs-1"><i class="bi bi-inbox"></i></div>
+                    <h6 class="fw-bold text-secondary">No complaints registered yet</h6>
+                    <p class="text-muted small mb-3">If you encounter an issue in your room or block, report it here.</p>
+                    <a asp-action="SubmitComplaint" class="btn btn-sm btn-violet px-3 py-2">
+                        <i class="bi bi-plus-circle me-1"></i>Submit Your First Complaint
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Title & Category</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var complaint in Model.RecentComplaints)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-light text-dark border font-monospace">@complaint.ReferenceNumber</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark text-truncate" style="max-width: 220px;" title="@complaint.Title">
+                                            @complaint.Title
+                                        </div>
+                                        <span class="small text-muted"><i class="bi bi-tag me-1"></i>@(complaint.Category?.Name ?? "General")</span>
+                                    </td>
+                                    <td>
+                                        <partial name="_PriorityBadgePartial" model="complaint.Priority" />
+                                    </td>
+                                    <td>
+                                        <partial name="_StatusBadgePartial" model="complaint.Status" />
+                                    </td>
+                                    <td class="small text-muted">
+                                        @complaint.CreatedAt.ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-controller="Complaints" asp-action="Details" asp-route-id="@complaint.Id" class="btn btn-sm btn-outline-violet px-2 py-1">
+                                            <i class="bi bi-eye me-1"></i>Track
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Column: Status Doughnut Chart & Recent Notifications -->
+    <div class="col-lg-4">
+        <!-- Chart.js Card -->
+        <div class="card-custom bg-white p-4 mb-4">
+            <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-pie-chart text-violet me-2"></i>Status Breakdown</h6>
+            <div style="height: 200px; position: relative;">
+                <canvas id="studentStatusChart"></canvas>
+            </div>
+            <div class="d-flex justify-content-around text-center mt-3 pt-2 border-top small">
+                <div>
+                    <span class="text-warning fw-bold d-block">@Model.PendingComplaints</span>
+                    <span class="text-muted" style="font-size:0.75rem;">Pending</span>
+                </div>
+                <div>
+                    <span class="text-primary fw-bold d-block">@Model.InProgressComplaints</span>
+                    <span class="text-muted" style="font-size:0.75rem;">In Progress</span>
+                </div>
+                <div>
+                    <span class="text-success fw-bold d-block">@Model.ResolvedComplaints</span>
+                    <span class="text-muted" style="font-size:0.75rem;">Resolved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Notifications Feed -->
+        <div class="card-custom bg-white p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-bell text-violet me-2"></i>Notifications</h6>
+                <a asp-controller="Notifications" asp-action="Index" class="small text-violet text-decoration-none">View All</a>
+            </div>
+
+            @if (!Model.RecentNotifications.Any())
+            {
+                <p class="text-muted small mb-0 text-center py-3">No new notifications.</p>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var n in Model.RecentNotifications)
+                    {
+                        <div class="p-2 rounded-2 border @(n.IsRead ? "bg-light" : "bg-violet-subtle border-violet") small">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="text-dark">@n.Title</strong>
+                                <span class="text-muted" style="font-size:0.7rem;">@n.CreatedAt.ToString("MMM dd HH:mm")</span>
+                            </div>
+                            <div class="text-muted mt-1 text-truncate" style="max-width: 280px;">@n.Message</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('studentStatusChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'In Progress', 'Resolved'],
+                        datasets: [{
+                            data: [@Model.PendingComplaints, @Model.InProgressComplaints, @Model.ResolvedComplaints],
+                            backgroundColor: ['#f59e0b', '#6366f1', '#10b981'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 11 } }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+        });
+    </script>
+}

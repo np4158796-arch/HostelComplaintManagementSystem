@@ -1,0 +1,240 @@
+/* ==========================================================================
+   HostelCare Design System & Typography
+   Subject: IT5039 Web Technology with .NET
+   Palette: Deep Navy (#0f172a), Rich Violet (#6366f1), Clean Slate (#f8fafc)
+   ========================================================================== */
+
+:root {
+    --hc-navy-dark: #0f172a;
+    --hc-navy-surface: #1e293b;
+    --hc-navy-muted: #334155;
+    --hc-violet: #6366f1;
+    --hc-violet-hover: #4f46e5;
+    --hc-violet-light: #e0e7ff;
+    --hc-bg-light: #f8fafc;
+    --hc-card-border: #e2e8f0;
+    --hc-text-main: #1e293b;
+    --hc-text-muted: #64748b;
+    --hc-success: #10b981;
+    --hc-warning: #f59e0b;
+    --hc-danger: #ef4444;
+    --hc-info: #06b6d4;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--hc-bg-light);
+    color: var(--hc-text-main);
+    line-height: 1.6;
+}
+
+/* Color Classes */
+.bg-navy { background-color: var(--hc-navy-dark) !important; }
+.bg-navy-surface { background-color: var(--hc-navy-surface) !important; }
+.bg-navy-light { background-color: rgba(255, 255, 255, 0.08) !important; }
+.text-violet { color: var(--hc-violet) !important; }
+.text-violet-subtle { color: #c7d2fe !important; }
+.bg-violet { background-color: var(--hc-violet) !important; }
+.bg-violet-subtle { background-color: var(--hc-violet-light) !important; }
+
+.bg-gradient-violet {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.bg-gradient-navy {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.bg-gradient-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31104b 100%);
+}
+
+/* Brand & Avatars */
+.brand-icon {
+    width: 42px;
+    height: 42px;
+}
+
+.avatar-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Card Styling */
+.card-custom {
+    background: #ffffff;
+    border: 1px solid var(--hc-card-border);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.card-custom:hover {
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card {
+    border-radius: 14px;
+    border: 1px solid var(--hc-card-border);
+    background: #ffffff;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07);
+}
+
+.stat-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Button Styling */
+.btn-violet {
+    background-color: var(--hc-violet);
+    color: #ffffff;
+    border: none;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-violet:hover, .btn-violet:focus {
+    background-color: var(--hc-violet-hover);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+.btn-outline-violet {
+    color: var(--hc-violet);
+    border: 1px solid var(--hc-violet);
+    background: transparent;
+    font-weight: 500;
+}
+
+.btn-outline-violet:hover {
+    background-color: var(--hc-violet);
+    color: #ffffff;
+}
+
+/* Vertical Timeline for Complaint Status History */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+    list-style: none;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 9px;
+    width: 2px;
+    background-color: #cbd5e1;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -2rem;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 3px solid var(--hc-violet);
+    z-index: 1;
+}
+
+.timeline-dot.active {
+    background-color: var(--hc-violet);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+.timeline-content {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.85rem 1.15rem;
+}
+
+/* Pulse animation for urgent notices */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Forms & Inputs */
+.form-control, .form-select {
+    border-radius: 8px;
+    border-color: #cbd5e1;
+    padding: 0.6rem 0.85rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--hc-violet);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Navigation items */
+.navbar-dark .navbar-nav .nav-link {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.5rem 0.85rem;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.hover-white:hover {
+    color: #ffffff !important;
+}
+
+/* Table styling */
+.table thead th {
+    background-color: #f1f5f9;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-top: none;
+    padding: 0.75rem 1rem;
+}
+
+.table td {
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+}

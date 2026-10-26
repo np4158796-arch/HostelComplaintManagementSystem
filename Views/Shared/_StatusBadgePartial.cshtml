@@ -1,0 +1,29 @@
+@model HostelComplaintManagementSystem.Models.ComplaintStatus
+
+@switch (Model)
+{
+    case HostelComplaintManagementSystem.Models.ComplaintStatus.Submitted:
+        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1"><i class="bi bi-inbox me-1"></i>Submitted</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintStatus.UnderReview:
+        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Under Review</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintStatus.Assigned:
+        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1"><i class="bi bi-person-check me-1"></i>Assigned</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintStatus.InProgress:
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1"><i class="bi bi-tools me-1"></i>In Progress</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintStatus.Resolved:
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check2-circle me-1"></i>Resolved</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintStatus.Closed:
+        <span class="badge bg-dark-subtle text-dark border border-dark-subtle px-2 py-1"><i class="bi bi-archive me-1"></i>Closed</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintStatus.Reopened:
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1"><i class="bi bi-arrow-repeat me-1"></i>Reopened</span>
+        break;
+    default:
+        <span class="badge bg-light text-dark border px-2 py-1">@Model</span>
+        break;
+}

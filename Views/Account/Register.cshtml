@@ -1,0 +1,90 @@
+@model HostelComplaintManagementSystem.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Student Registration";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-9 col-lg-7">
+        <div class="card-custom p-4 p-md-5 bg-white shadow-sm border">
+            <div class="text-center mb-4">
+                <div class="brand-icon bg-gradient-violet text-white rounded-3 mx-auto d-flex align-items-center justify-content-center mb-2">
+                    <i class="bi bi-person-plus fs-4"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">Student Registration</h3>
+                <p class="text-muted small">Create your student resident account for hostel complaint lodging</p>
+            </div>
+
+            <form asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label small fw-semibold text-secondary"></label>
+                        <input asp-for="FullName" class="form-control" placeholder="e.g. Aarav Sharma" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="StudentId" class="form-label small fw-semibold text-secondary"></label>
+                        <input asp-for="StudentId" class="form-control" placeholder="e.g. 2023BTE042" />
+                        <span asp-validation-for="StudentId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label small fw-semibold text-secondary"></label>
+                        <input asp-for="Email" class="form-control" placeholder="e.g. aarav@college.edu" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label small fw-semibold text-secondary"></label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="10-digit mobile number" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BlockId" class="form-label small fw-semibold text-secondary"></label>
+                        <select asp-for="BlockId" asp-items="ViewBag.Blocks" class="form-select">
+                            <option value="">-- Select Your Hostel Block --</option>
+                        </select>
+                        <span asp-validation-for="BlockId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="RoomNumber" class="form-label small fw-semibold text-secondary"></label>
+                        <input asp-for="RoomNumber" class="form-control" placeholder="e.g. A-204" />
+                        <span asp-validation-for="RoomNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label small fw-semibold text-secondary"></label>
+                        <input asp-for="Password" class="form-control" placeholder="Minimum 6 characters" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label small fw-semibold text-secondary"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" placeholder="Re-enter password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2">
+                    <button type="submit" class="btn btn-violet w-100 py-2 rounded-3 fw-semibold">
+                        <i class="bi bi-person-check me-1"></i>Create Student Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <span class="small text-muted">Already registered?</span>
+                <a asp-action="Login" class="small fw-semibold text-violet text-decoration-none ms-1">Log in here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

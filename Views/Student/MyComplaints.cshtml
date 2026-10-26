@@ -1,0 +1,142 @@
+@model HostelComplaintManagementSystem.ViewModels.ComplaintFilterViewModel
+@{
+    ViewData["Title"] = "My Complaints";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">My Complaints</h3>
+        <p class="text-muted small mb-0">Track all issues submitted by your account and view real-time resolution progress.</p>
+    </div>
+    <a asp-action="SubmitComplaint" class="btn btn-violet rounded-3 px-3 py-2 shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i>New Complaint
+    </a>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card-custom bg-white p-3 mb-4 shadow-xs">
+    <form asp-action="MyComplaints" method="get">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control border-start-0" placeholder="Search by title or HC reference..." />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="CategoryId" asp-items="Model.Categories" class="form-select">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select name="Status" asp-items="Html.GetEnumSelectList<HostelComplaintManagementSystem.Models.ComplaintStatus>()" class="form-select">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-navy flex-grow-1 text-white"><i class="bi bi-filter me-1"></i>Filter</button>
+                <a asp-action="MyComplaints" class="btn btn-light" title="Reset Filters"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Complaints List -->
+<div class="card-custom bg-white p-0 overflow-hidden shadow-sm">
+    @if (!Model.Complaints.Any())
+    {
+        <div class="text-center py-5">
+            <div class="text-muted mb-3 fs-1"><i class="bi bi-search"></i></div>
+            <h5 class="fw-bold text-secondary">No complaints found</h5>
+            <p class="text-muted small mb-3">Try adjusting your filters or search keywords.</p>
+            <a asp-action="SubmitComplaint" class="btn btn-sm btn-violet px-3 py-2">Submit New Complaint</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Title & Category</th>
+                        <th>Priority</th>
+                        <th>Assigned Staff</th>
+                        <th>Status</th>
+                        <th>Submitted On</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Complaints)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-dark border font-monospace fs-6">@c.ReferenceNumber</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark text-truncate" style="max-width: 250px;" title="@c.Title">
+                                    @c.Title
+                                </div>
+                                <span class="small text-muted"><i class="bi bi-tag me-1"></i>@(c.Category?.Name ?? "General")</span>
+                            </td>
+                            <td>
+                                <partial name="_PriorityBadgePartial" model="c.Priority" />
+                            </td>
+                            <td>
+                                @if (c.AssignedStaff != null)
+                                {
+                                    <span class="small text-dark fw-medium"><i class="bi bi-person-check text-success me-1"></i>@c.AssignedStaff.FullName</span>
+                                }
+                                else
+                                {
+                                    <span class="small text-muted fst-italic">Pending Assignment</span>
+                                }
+                            </td>
+                            <td>
+                                <partial name="_StatusBadgePartial" model="c.Status" />
+                            </td>
+                            <td class="small text-muted">
+                                @c.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                            </td>
+                            <td class="text-end">
+                                <a asp-controller="Complaints" asp-action="Details" asp-route-id="@c.Id" class="btn btn-sm btn-outline-violet px-3">
+                                    <i class="bi bi-eye me-1"></i>Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted">
+                    Showing @(((Model.PageNumber - 1) * Model.PageSize) + 1) to @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalItems)) of @Model.TotalItems complaints
+                </span>
+                <nav aria-label="Complaints pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="MyComplaints" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryId="@Model.CategoryId" asp-route-Status="@Model.Status">Previous</a>
+                        </li>
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                                <a class="page-link" asp-action="MyComplaints" asp-route-PageNumber="@i" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryId="@Model.CategoryId" asp-route-Status="@Model.Status">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-action="MyComplaints" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryId="@Model.CategoryId" asp-route-Status="@Model.Status">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+</div>

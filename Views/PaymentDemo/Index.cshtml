@@ -1,0 +1,135 @@
+@model HostelComplaintManagementSystem.ViewModels.PaymentCheckoutViewModel
+@{
+    ViewData["Title"] = "Hostel Fee Payment Demonstration";
+    var pastPayments = ViewBag.PastPayments as IEnumerable<HostelComplaintManagementSystem.Models.HostelPayment>;
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-10">
+        <!-- Academic Syllabus Banner -->
+        <div class="alert alert-info shadow-sm d-flex align-items-center mb-4">
+            <i class="bi bi-mortarboard-fill fs-4 me-3 text-primary"></i>
+            <div>
+                <strong>IT5039 Syllabus Requirement — Unit VI: Online Payment Demonstration</strong>
+                <p class="small mb-0 text-secondary">
+                    This feature demonstrates online fee processing, transaction auditing, and status lifecycle integration. It utilizes a safe simulation sandbox; no real banking data or credit cards are collected.
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Checkout Simulator -->
+            <div class="col-lg-6">
+                <div class="card-custom bg-white p-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-credit-card text-violet me-2"></i>Fee Checkout</h5>
+                        <span class="badge bg-violet text-white">Semester 1</span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                            <span>Student:</span>
+                            <strong class="text-dark">@Model.StudentName</strong>
+                        </div>
+                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                            <span>Hostel Room:</span>
+                            <strong class="text-dark">@Model.BlockName - @Model.RoomNumber</strong>
+                        </div>
+                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                            <span>Fee Head:</span>
+                            <strong class="text-dark">@Model.FeeType</strong>
+                        </div>
+                        <hr class="my-2" />
+                        <div class="d-flex justify-content-between fs-5 fw-bold text-dark">
+                            <span>Total Payable:</span>
+                            <span class="text-success">₹@Model.Amount.ToString("N2")</span>
+                        </div>
+                    </div>
+
+                    <form asp-action="ProcessDemoPayment" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Amount" />
+                        <input type="hidden" asp-for="FeeType" />
+                        <input type="hidden" asp-for="Description" />
+                        <input type="hidden" asp-for="StudentName" />
+                        <input type="hidden" asp-for="RoomNumber" />
+                        <input type="hidden" asp-for="BlockName" />
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Select Demo Payment Channel</label>
+                            <select asp-for="PaymentMethod" class="form-select">
+                                <option value="UPI Gateway (Demo QR / VPA)">UPI Gateway (Demo QR / VPA)</option>
+                                <option value="Campus NetBanking Portal (Demo)">Campus NetBanking Portal (Demo)</option>
+                                <option value="Student Hostel Debit Card (Demo)">Student Hostel Debit Card (Demo)</option>
+                            </select>
+                        </div>
+
+                        <!-- Simulator Response Outcome Selector -->
+                        <div class="mb-4 p-3 bg-warning-subtle border border-warning rounded-3">
+                            <label class="form-label small fw-bold text-warning-emphasis">
+                                <i class="bi bi-sliders me-1"></i>Viva Demonstration Simulator Outcome:
+                            </label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="SimulationResult" value="Success" id="resSuccess" checked />
+                                    <label class="form-check-label small fw-semibold text-success" for="resSuccess">
+                                        Simulate Success
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="SimulationResult" value="Failed" id="resFailed" />
+                                    <label class="form-check-label small fw-semibold text-danger" for="resFailed">
+                                        Simulate Gateway Failure
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-violet w-100 py-2 fs-6">
+                            <i class="bi bi-shield-check me-2"></i>Execute Simulated Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Past Payment Transactions Audit -->
+            <div class="col-lg-6">
+                <div class="card-custom bg-white p-4 shadow-sm">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-receipt text-violet me-2"></i>Payment Receipts & History</h6>
+
+                    @if (pastPayments == null || !pastPayments.Any())
+                    {
+                        <div class="text-center py-4 text-muted small">
+                            <i class="bi bi-inbox fs-2 text-secondary d-block mb-1"></i>
+                            No recorded transactions yet. Try submitting a demo checkout on the left.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column gap-2" style="max-height: 440px; overflow-y: auto;">
+                            @foreach (var p in pastPayments)
+                            {
+                                <div class="p-3 rounded-3 border bg-light small">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="font-monospace fw-bold text-dark">@p.TransactionId</span>
+                                        <span class="badge @(p.Status == HostelComplaintManagementSystem.Models.PaymentStatus.Completed ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                                            @p.Status
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-secondary">
+                                        <span>@p.FeeType</span>
+                                        <strong class="text-dark">₹@p.Amount.ToString("N2")</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted mt-1" style="font-size:0.75rem;">
+                                        <span><i class="bi bi-credit-card-2-front me-1"></i>@p.PaymentMethod</span>
+                                        <span>@p.PaymentDate.ToString("MMM dd, yyyy HH:mm")</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

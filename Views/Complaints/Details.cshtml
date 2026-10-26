@@ -1,0 +1,305 @@
+@model HostelComplaintManagementSystem.ViewModels.ComplaintDetailsViewModel
+@{
+    ViewData["Title"] = $"Complaint {Model.Complaint.ReferenceNumber}";
+    bool isStaffOrWarden = User.IsInRole("Warden") || User.IsInRole("MaintenanceStaff");
+}
+
+<div class="mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <div class="d-flex align-items-center gap-2">
+            @if (User.IsInRole("Warden"))
+            {
+                <a asp-controller="Warden" asp-action="ManageComplaints" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Complaints
+                </a>
+            }
+            else if (User.IsInRole("MaintenanceStaff"))
+            {
+                <a asp-controller="Staff" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Tasks
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Student" asp-action="MyComplaints" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to My Complaints
+                </a>
+            }
+            <span class="badge bg-light text-dark border font-monospace fs-6 px-3 py-1">@Model.Complaint.ReferenceNumber</span>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+            <partial name="_PriorityBadgePartial" model="Model.Complaint.Priority" />
+            <partial name="_StatusBadgePartial" model="Model.Complaint.Status" />
+
+            @if (Model.CanReopen)
+            {
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reopenModal">
+                    <i class="bi bi-arrow-repeat me-1"></i>Reopen Issue
+                </button>
+            }
+        </div>
+    </div>
+    <h3 class="fw-bold text-dark mb-0">@Model.Complaint.Title</h3>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Details, Image & Discussion Thread -->
+    <div class="col-lg-7">
+        <!-- Main Details Card -->
+        <div class="card-custom bg-white p-4 mb-4">
+            <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                <i class="bi bi-file-text text-violet me-2"></i>Issue Specification
+            </h6>
+
+            <div class="p-3 bg-light rounded-3 mb-4 text-dark" style="white-space: pre-line;">
+                @Model.Complaint.Description
+            </div>
+
+            <!-- Evidence Image Attachment -->
+            @if (!string.IsNullOrEmpty(Model.Complaint.ImageAttachmentUrl))
+            {
+                <div class="mb-4">
+                    <h6 class="fw-bold text-secondary small mb-2"><i class="bi bi-camera me-1"></i>Attached Evidence:</h6>
+                    <a href="@Model.Complaint.ImageAttachmentUrl" target="_blank" title="Click to view full image">
+                        <img src="@Model.Complaint.ImageAttachmentUrl" alt="Attached evidence" class="img-thumbnail rounded-3 shadow-xs" style="max-height: 250px; object-fit: cover;" />
+                    </a>
+                </div>
+            }
+
+            <!-- Administrative Response / Resolution Notes if present -->
+            @if (!string.IsNullOrEmpty(Model.Complaint.AdminResponse))
+            {
+                <div class="p-3 bg-info-subtle border border-info rounded-3 mb-3">
+                    <strong class="text-info-emphasis d-block small mb-1"><i class="bi bi-megaphone-fill me-1"></i>Official Administrative Response:</strong>
+                    <div class="small text-dark">@Model.Complaint.AdminResponse</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Complaint.ResolutionNotes))
+            {
+                <div class="p-3 bg-success-subtle border border-success rounded-3 mb-3">
+                    <strong class="text-success d-block small mb-1"><i class="bi bi-check-circle-fill me-1"></i>Technician Resolution Notes:</strong>
+                    <div class="small text-dark">@Model.Complaint.ResolutionNotes</div>
+                    @if (Model.Complaint.ResolvedAt.HasValue)
+                    {
+                        <div class="small text-muted mt-1">Resolved on: @Model.Complaint.ResolvedAt.Value.ToString("MMM dd, yyyy HH:mm")</div>
+                    }
+                </div>
+            }
+
+            <!-- Metadata Specs Row -->
+            <div class="row g-3 pt-3 border-top small text-secondary">
+                <div class="col-6 col-sm-4">
+                    <span class="text-muted d-block">Category</span>
+                    <strong class="text-dark"><i class="bi bi-tag me-1"></i>@(Model.Complaint.Category?.Name ?? "General")</strong>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <span class="text-muted d-block">Hostel Block</span>
+                    <strong class="text-dark">@(Model.Complaint.HostelBlock?.Name ?? "Main Block")</strong>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <span class="text-muted d-block">Room Number</span>
+                    <strong class="text-dark"><i class="bi bi-door-closed me-1"></i>@Model.Complaint.RoomNumber</strong>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <span class="text-muted d-block">Reported By</span>
+                    <strong class="text-dark">@(Model.Complaint.Student?.FullName ?? "Student")</strong>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <span class="text-muted d-block">Assigned Technician</span>
+                    <strong class="text-dark">
+                        @(Model.Complaint.AssignedStaff != null ? Model.Complaint.AssignedStaff.FullName : "Not assigned yet")
+                    </strong>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <span class="text-muted d-block">Submitted At</span>
+                    <strong class="text-dark">@Model.Complaint.CreatedAt.ToString("MMM dd, yyyy HH:mm")</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments & Updates Thread -->
+        <div class="card-custom bg-white p-4">
+            <h6 class="fw-bold text-dark mb-3">
+                <i class="bi bi-chat-left-text text-violet me-2"></i>Communication & Progress Notes (@Model.Complaint.Comments.Count)
+            </h6>
+
+            @if (!Model.Complaint.Comments.Any())
+            {
+                <p class="text-muted small fst-italic mb-4 text-center py-3 bg-light rounded-2">No comments posted yet.</p>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3 mb-4">
+                    @foreach (var comment in Model.Complaint.Comments)
+                    {
+                        <div class="p-3 rounded-3 border @(comment.IsInternal ? "bg-warning-subtle border-warning" : "bg-light")">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="d-flex align-items-center gap-2">
+                                    <strong class="small text-dark">@(comment.User?.FullName ?? "User")</strong>
+                                    @if (comment.IsInternal)
+                                    {
+                                        <span class="badge bg-warning text-dark" style="font-size:0.65rem;">Internal Admin Note</span>
+                                    }
+                                </div>
+                                <span class="text-muted" style="font-size: 0.72rem;">@comment.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                            </div>
+                            <div class="small text-dark" style="white-space: pre-line;">@comment.CommentText</div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Add Comment Form -->
+            <form asp-action="AddComment" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ComplaintId" value="@Model.Complaint.Id" />
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary">Add a Comment or Update</label>
+                    <textarea name="CommentText" rows="3" class="form-control" placeholder="Write your message here..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    @if (isStaffOrWarden)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="IsInternal" value="true" id="internalCheck">
+                            <label class="form-check-label small text-muted" for="internalCheck">
+                                <i class="bi bi-lock-fill text-warning me-1"></i>Internal note (hidden from student)
+                            </label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div></div>
+                    }
+                    <button type="submit" class="btn btn-sm btn-violet px-3 py-2">
+                        <i class="bi bi-send me-1"></i>Post Comment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Status History Timeline & Administrative Quick Controls -->
+    <div class="col-lg-5">
+        <!-- Quick Warden/Staff Controls Card (If authorized) -->
+        @if (isStaffOrWarden)
+        {
+            <div class="card-custom bg-white p-4 mb-4 border-violet">
+                <h6 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-gear text-violet me-2"></i>Action Controls
+                </h6>
+
+                <!-- Assign Staff Form (Warden) -->
+                @if (User.IsInRole("Warden") && Model.StaffList != null)
+                {
+                    <form asp-controller="Warden" asp-action="AssignStaff" method="post" class="mb-3 pb-3 border-bottom">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="complaintId" value="@Model.Complaint.Id" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                        <label class="form-label small fw-semibold text-secondary">Assign / Reassign Technician</label>
+                        <div class="input-group mb-2">
+                            <select name="staffId" asp-items="Model.StaffList" class="form-select form-select-sm">
+                                <option value="">-- Choose Staff Member --</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-navy text-white">Assign</button>
+                        </div>
+                    </form>
+                }
+
+                <!-- Update Status Form -->
+                <form asp-controller="Warden" asp-action="UpdateStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ComplaintId" value="@Model.Complaint.Id" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-secondary">Change Status</label>
+                        <select name="NewStatus" asp-items="Html.GetEnumSelectList<HostelComplaintManagementSystem.Models.ComplaintStatus>()" class="form-select form-select-sm">
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-secondary">Remarks / Resolution Notes</label>
+                        <textarea name="Notes" rows="2" class="form-control form-control-sm" placeholder="Notes for history log..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Student-Facing Admin Response</label>
+                        <input type="text" name="AdminResponse" value="@Model.Complaint.AdminResponse" class="form-control form-control-sm" placeholder="Official response shown to student" />
+                    </div>
+
+                    <button type="submit" class="btn btn-sm btn-violet w-100 py-2">
+                        <i class="bi bi-arrow-repeat me-1"></i>Update Status
+                    </button>
+                </form>
+            </div>
+        }
+
+        <!-- Status History Vertical Timeline -->
+        <div class="card-custom bg-white p-4">
+            <h6 class="fw-bold text-dark mb-4">
+                <i class="bi bi-clock-history text-violet me-2"></i>Status History Timeline
+            </h6>
+
+            @if (!Model.Complaint.StatusHistories.Any())
+            {
+                <p class="text-muted small">No status transitions recorded yet.</p>
+            }
+            else
+            {
+                <ul class="timeline mb-0">
+                    @foreach (var history in Model.Complaint.StatusHistories)
+                    {
+                        <li class="timeline-item">
+                            <div class="timeline-dot @(history == Model.Complaint.StatusHistories.First() ? "active" : "")"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <partial name="_StatusBadgePartial" model="history.NewStatus" />
+                                    <span class="text-muted" style="font-size:0.7rem;">@history.ChangedAt.ToString("MMM dd HH:mm")</span>
+                                </div>
+                                <div class="small fw-semibold text-dark">By: @(history.ChangedBy?.FullName ?? "System")</div>
+                                @if (!string.IsNullOrEmpty(history.Notes))
+                                {
+                                    <div class="small text-muted mt-1">@history.Notes</div>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Reopen Modal -->
+<div class="modal fade" id="reopenModal" tabindex="-1" aria-labelledby="reopenModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-controller="Student" asp-action="Reopen" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="complaintId" value="@Model.Complaint.Id" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="reopenModalLabel">Reopen Complaint @Model.Complaint.ReferenceNumber</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">
+                        If the issue has recurred or the repair was unsatisfactory, describe why you are reopening this complaint.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Reason for Reopening *</label>
+                        <textarea name="reason" rows="3" class="form-control" required placeholder="e.g. Tap started leaking again after 2 hours..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Reopen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

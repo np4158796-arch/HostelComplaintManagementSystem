@@ -1,0 +1,107 @@
+@model HostelComplaintManagementSystem.ViewModels.CategoryManagementViewModel
+@{
+    ViewData["Title"] = "Complaint Categories & Caching";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-primary-subtle text-primary small">IT5039 Unit III - In-Memory Caching</span>
+            <span class="badge bg-success-subtle text-success small"><i class="bi bi-lightning-charge me-1"></i>Auto Invalidation</span>
+        </div>
+        <h3 class="fw-bold mb-1 text-dark">Complaint Categories Management</h3>
+        <p class="text-muted small mb-0">Manage issue classifications. Updating categories automatically invalidates the application memory cache.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Add Category Form -->
+    <div class="col-lg-4">
+        <div class="card-custom bg-white p-4 shadow-sm">
+            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-plus-circle text-violet me-2"></i>Create New Category</h6>
+            <form asp-action="AddCategory" method="post">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary">Category Name *</label>
+                    <input type="text" name="NewCategoryName" class="form-control" placeholder="e.g. Air Conditioning & HVAC" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary">Bootstrap Icon Class</label>
+                    <input type="text" name="NewCategoryIcon" value="bi-snow" class="form-control font-monospace" placeholder="e.g. bi-snow, bi-shield-lock" required />
+                    <div class="form-text small text-muted">Use any standard Bootstrap icon class.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary">Description</label>
+                    <textarea name="NewCategoryDescription" rows="3" class="form-control" placeholder="Scope of issues covered under this category..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-violet w-100 py-2">
+                    <i class="bi bi-save me-1"></i>Save & Refresh Cache
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category List with Cache Invalidation Trigger -->
+    <div class="col-lg-8">
+        <div class="card-custom bg-white p-0 overflow-hidden shadow-sm">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-tags text-violet me-2"></i>Active Categories in Database & Cache (@Model.Categories.Count())
+                </h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Icon</th>
+                            <th>Category Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th class="text-end">Toggle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="stat-icon-wrapper bg-light text-violet fs-5">
+                                        <i class="bi @cat.Icon"></i>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@cat.Name</div>
+                                    <span class="small font-monospace text-muted">ID: @cat.Id</span>
+                                </td>
+                                <td class="small text-secondary" style="max-width: 280px;">
+                                    @(cat.Description ?? "No description provided.")
+                                </td>
+                                <td>
+                                    @if (cat.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Disabled</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <form asp-action="ToggleCategoryStatus" asp-route-id="@cat.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-xs @(cat.IsActive ? "btn-outline-danger" : "btn-outline-success") py-1 px-2 small">
+                                            @(cat.IsActive ? "Disable" : "Enable")
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

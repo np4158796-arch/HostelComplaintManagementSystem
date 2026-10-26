@@ -1,0 +1,20 @@
+@model HostelComplaintManagementSystem.Models.ComplaintPriority
+
+@switch (Model)
+{
+    case HostelComplaintManagementSystem.Models.ComplaintPriority.Low:
+        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1"><i class="bi bi-chevron-down me-1"></i>Low</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintPriority.Medium:
+        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1"><i class="bi bi-dash me-1"></i>Medium</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintPriority.High:
+        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1"><i class="bi bi-chevron-up me-1"></i>High</span>
+        break;
+    case HostelComplaintManagementSystem.Models.ComplaintPriority.Urgent:
+        <span class="badge bg-danger text-white border border-danger shadow-xs px-2 py-1 animate-pulse"><i class="bi bi-exclamation-octagon-fill me-1"></i>Urgent</span>
+        break;
+    default:
+        <span class="badge bg-light text-dark border px-2 py-1">@Model</span>
+        break;
+}

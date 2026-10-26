@@ -1,0 +1,97 @@
+@model HostelComplaintManagementSystem.Models.Complaint
+@{
+    ViewData["Title"] = "Track Complaint Status";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        <div class="text-center mb-4">
+            <span class="badge bg-violet text-white px-3 py-1 rounded-pill mb-2">Live Status Lookup</span>
+            <h3 class="fw-bold text-dark">Track Your Complaint</h3>
+            <p class="text-muted small">Enter your unique reference number (e.g., HC-2026-0001) to view real-time resolution progress.</p>
+        </div>
+
+        <!-- Lookup Search Box -->
+        <div class="card-custom bg-white p-4 mb-4 shadow-sm">
+            <form asp-action="Track" method="get">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="refNumber" value="@(Model?.ReferenceNumber ?? Context.Request.Query["refNumber"])" class="form-control border-start-0 font-monospace fs-6" placeholder="Enter Reference ID e.g. HC-2026-0001" required />
+                    <button type="submit" class="btn btn-violet px-4 fs-6">Track Status</button>
+                </div>
+            </form>
+        </div>
+
+        @if (ViewBag.NotFoundMessage != null)
+        {
+            <div class="alert alert-warning shadow-sm d-flex align-items-center mb-4">
+                <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                <div>@ViewBag.NotFoundMessage</div>
+            </div>
+        }
+
+        @if (Model != null)
+        {
+            <div class="card-custom bg-white p-4 p-md-5 shadow-sm border">
+                <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 border-bottom mb-4 gap-2">
+                    <div>
+                        <span class="badge bg-light text-dark border font-monospace fs-6 px-3 py-1">@Model.ReferenceNumber</span>
+                        <h4 class="fw-bold text-dark mt-2 mb-0">@Model.Title</h4>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <partial name="_PriorityBadgePartial" model="Model.Priority" />
+                        <partial name="_StatusBadgePartial" model="Model.Status" />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4 small text-secondary">
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Category</span>
+                        <strong class="text-dark">@(Model.Category?.Name ?? "General")</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Hostel Block</span>
+                        <strong class="text-dark">@(Model.HostelBlock?.Name ?? "Main Block")</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Room</span>
+                        <strong class="text-dark">@Model.RoomNumber</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Submitted Date</span>
+                        <strong class="text-dark">@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Last Updated</span>
+                        <strong class="text-dark">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("MMM dd, yyyy HH:mm") : "N/A")</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Resolved Date</span>
+                        <strong class="text-dark">@(Model.ResolvedAt.HasValue ? Model.ResolvedAt.Value.ToString("MMM dd, yyyy HH:mm") : "In Progress")</strong>
+                    </div>
+                </div>
+
+                <!-- Progress History Timeline -->
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-violet me-2"></i>Status Journey</h6>
+                <ul class="timeline mb-0">
+                    @foreach (var h in Model.StatusHistories)
+                    {
+                        <li class="timeline-item">
+                            <div class="timeline-dot @(h == Model.StatusHistories.First() ? "active" : "")"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <partial name="_StatusBadgePartial" model="h.NewStatus" />
+                                    <span class="text-muted" style="font-size:0.7rem;">@h.ChangedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(h.Notes))
+                                {
+                                    <div class="small text-muted mt-1">@h.Notes</div>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,122 @@
+@model HostelComplaintManagementSystem.ViewModels.UserManagementViewModel
+@{
+    ViewData["Title"] = "User Account Management";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">User & Staff Directory</h3>
+        <p class="text-muted small mb-0">Manage registered student resident profiles and maintenance technician accounts.</p>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card-custom bg-white p-3 mb-4 shadow-sm">
+    <form asp-action="ManageUsers" method="get">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control border-start-0" placeholder="Search by name, email, student ID, or room..." />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="roleFilter" asp-items="Html.GetEnumSelectList<HostelComplaintManagementSystem.Models.UserRoleType>()" class="form-select">
+                    <option value="">All Roles</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-navy flex-grow-1 text-white">Filter</button>
+                <a asp-action="ManageUsers" class="btn btn-light"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Users Table -->
+<div class="card-custom bg-white p-0 overflow-hidden shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Full Name & Role</th>
+                    <th>Email Address</th>
+                    <th>ID / Employee Code</th>
+                    <th>Hostel & Room</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-dark">@user.FullName</div>
+                            @switch (user.UserRole)
+                            {
+                                case HostelComplaintManagementSystem.Models.UserRoleType.Warden:
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Warden</span>
+                                    break;
+                                case HostelComplaintManagementSystem.Models.UserRoleType.MaintenanceStaff:
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Technician</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Student</span>
+                                    break;
+                            }
+                        </td>
+                        <td class="small text-secondary">
+                            <i class="bi bi-envelope me-1"></i>@user.Email
+                        </td>
+                        <td class="small font-monospace">
+                            @(user.StudentId ?? "N/A")
+                        </td>
+                        <td class="small text-secondary">
+                            @if (!string.IsNullOrEmpty(user.RoomNumber))
+                            {
+                                <span><i class="bi bi-door-closed me-1"></i>@(user.HostelBlock?.Name?.Split(' ')[0] ?? "Block") - @user.RoomNumber</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i>Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-slash-circle me-1"></i>Inactive</span>
+                            }
+                        </td>
+                        <td class="small text-muted">
+                            @user.CreatedAt.ToString("MMM yyyy")
+                        </td>
+                        <td class="text-end">
+                            <form asp-action="ToggleUserStatus" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to change account status for this user?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                @if (user.IsActive)
+                                {
+                                    <button type="submit" class="btn btn-xs btn-outline-danger py-1 px-2 small">
+                                        <i class="bi bi-person-x me-1"></i>Deactivate
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-xs btn-outline-success py-1 px-2 small">
+                                        <i class="bi bi-person-check me-1"></i>Activate
+                                    </button>
+                                }
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

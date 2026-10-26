@@ -1,0 +1,262 @@
+@model HostelComplaintManagementSystem.ViewModels.ComplaintFilterViewModel
+@{
+    ViewData["Title"] = "Manage Complaints";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">Master Complaint Register</h3>
+        <p class="text-muted small mb-0">Search, triage, assign technicians, and audit complaints across all hostel wings.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="ExportCsv" asp-route-CategoryId="@Model.CategoryId" asp-route-Status="@Model.Status" class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export to CSV
+        </a>
+    </div>
+</div>
+
+<!-- Search & Advanced Filter Card -->
+<div class="card-custom bg-white p-4 mb-4 shadow-sm">
+    <form asp-action="ManageComplaints" method="get">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-secondary">Search Keyword</label>
+                <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control form-control-sm" placeholder="Ref ID, Title, Student, Room..." />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-secondary">Category</label>
+                <select name="CategoryId" asp-items="Model.Categories" class="form-select form-select-sm">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-secondary">Status</label>
+                <select name="Status" asp-items="Html.GetEnumSelectList<HostelComplaintManagementSystem.Models.ComplaintStatus>()" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-secondary">Priority</label>
+                <select name="Priority" asp-items="Html.GetEnumSelectList<HostelComplaintManagementSystem.Models.ComplaintPriority>()" class="form-select form-select-sm">
+                    <option value="">All Priorities</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-secondary">Hostel Block</label>
+                <select name="BlockId" asp-items="Model.Blocks" class="form-select form-select-sm">
+                    <option value="">All Blocks</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+            <a asp-action="ManageComplaints" class="btn btn-sm btn-light">Reset Filters</a>
+            <button type="submit" class="btn btn-sm btn-navy text-white px-4">
+                <i class="bi bi-funnel me-1"></i>Apply Filters
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Complaints Data Table -->
+<div class="card-custom bg-white p-0 overflow-hidden shadow-sm">
+    @if (!Model.Complaints.Any())
+    {
+        <div class="text-center py-5">
+            <div class="text-muted mb-2 fs-1"><i class="bi bi-inbox"></i></div>
+            <h5 class="fw-bold text-secondary">No matching complaints</h5>
+            <p class="text-muted small">Try modifying the search criteria.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Student & Room</th>
+                        <th>Title & Category</th>
+                        <th>Priority</th>
+                        <th>Assigned Staff</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Complaints)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-dark border font-monospace">@c.ReferenceNumber</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark small">@(c.Student?.FullName ?? "N/A")</div>
+                                <div class="small text-muted">
+                                    <i class="bi bi-door-closed me-1"></i>@(c.HostelBlock?.Name?.Split(' ')[0] ?? "Block") - @c.RoomNumber
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark text-truncate small" style="max-width: 220px;" title="@c.Title">@c.Title</div>
+                                <span class="badge bg-light text-secondary border" style="font-size:0.7rem;">@(c.Category?.Name ?? "General")</span>
+                            </td>
+                            <td>
+                                <partial name="_PriorityBadgePartial" model="c.Priority" />
+                            </td>
+                            <td>
+                                @if (c.AssignedStaff != null)
+                                {
+                                    <span class="small text-dark fw-medium"><i class="bi bi-person-check text-success me-1"></i>@c.AssignedStaff.FullName</span>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-xs btn-outline-warning py-0 px-2 small" onclick="openAssignModal(@c.Id, '@c.ReferenceNumber')">
+                                        <i class="bi bi-person-plus me-1"></i>Assign Staff
+                                    </button>
+                                }
+                            </td>
+                            <td>
+                                <partial name="_StatusBadgePartial" model="c.Status" />
+                            </td>
+                            <td class="small text-muted">
+                                @c.CreatedAt.ToString("MMM dd HH:mm")
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-controller="Complaints" asp-action="Details" asp-route-id="@c.Id" class="btn btn-outline-secondary" title="View Full Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-primary" title="Quick Status Update" onclick="openStatusModal(@c.Id, '@c.ReferenceNumber', @((int)c.Status))">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted">
+                    Page @Model.PageNumber of @Model.TotalPages (@Model.TotalItems complaints total)
+                </span>
+                <nav aria-label="Complaints page navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="ManageComplaints" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryId="@Model.CategoryId" asp-route-Status="@Model.Status" asp-route-Priority="@Model.Priority" asp-route-BlockId="@Model.BlockId">Previous</a>
+                        </li>
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                                <a class="page-link" asp-action="ManageComplaints" asp-route-PageNumber="@i" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryId="@Model.CategoryId" asp-route-Status="@Model.Status" asp-route-Priority="@Model.Priority" asp-route-BlockId="@Model.BlockId">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-action="ManageComplaints" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryId="@Model.CategoryId" asp-route-Status="@Model.Status" asp-route-Priority="@Model.Priority" asp-route-BlockId="@Model.BlockId">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+</div>
+
+<!-- Quick Assign Staff Modal -->
+<div class="modal fade" id="quickAssignModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="AssignStaff" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="assignComplaintId" name="complaintId" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Assign Staff to <span id="assignRefText" class="text-violet font-monospace"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Select Technician *</label>
+                        <select name="staffId" asp-items="ViewBag.StaffList" class="form-select" required>
+                            <option value="">-- Choose Maintenance Staff --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Assignment Instructions (Optional)</label>
+                        <textarea name="notes" rows="2" class="form-control" placeholder="Specific notes or required tools..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-violet">Confirm Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Status Update Modal -->
+<div class="modal fade" id="quickStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UpdateStatus" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="statusComplaintId" name="ComplaintId" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Update Status for <span id="statusRefText" class="text-violet font-monospace"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">New Status *</label>
+                        <select id="statusSelect" name="NewStatus" asp-items="Html.GetEnumSelectList<HostelComplaintManagementSystem.Models.ComplaintStatus>()" class="form-select" required>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">History Transition Note</label>
+                        <textarea name="Notes" rows="2" class="form-control" placeholder="Reason or update summary for audit trail..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Student-Facing Admin Response</label>
+                        <input type="text" name="AdminResponse" class="form-control" placeholder="Message visible to student on their dashboard..." />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-navy text-white">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openAssignModal(complaintId, refNumber) {
+            document.getElementById('assignComplaintId').value = complaintId;
+            document.getElementById('assignRefText').innerText = refNumber;
+            const modal = new bootstrap.Modal(document.getElementById('quickAssignModal'));
+            modal.show();
+        }
+
+        function openStatusModal(complaintId, refNumber, currentStatus) {
+            document.getElementById('statusComplaintId').value = complaintId;
+            document.getElementById('statusRefText').innerText = refNumber;
+            const select = document.getElementById('statusSelect');
+            if (select) select.value = currentStatus;
+            const modal = new bootstrap.Modal(document.getElementById('quickStatusModal'));
+            modal.show();
+        }
+    </script>
+}
